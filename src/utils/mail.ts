@@ -19,7 +19,7 @@ const mail = {
     await transport.sendMail({
       to: options.to,
       from: process.env.VERIFICATION_MAIL,
-      subject: 'Login link',
+      subject: 'Link para loguearse en Letras Viajeras',
       html: `
       <div>
       <p>Por Favor, haz click <a href="${options.link}">en este link</a> para loguearte en tu cuenta.</p>
