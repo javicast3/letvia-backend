@@ -1,5 +1,6 @@
 import {
   generateAuthLink,
+  logout,
   sendProfileInfo,
   verifyAuthToken,
 } from '@/controllers/auth';
@@ -19,5 +20,6 @@ authRouter.post(
 );
 authRouter.get('/email', verifyAuthToken);
 authRouter.get('/profile', isAuth, sendProfileInfo);
+authRouter.post('/logout', isAuth, logout);
 
 export default authRouter;

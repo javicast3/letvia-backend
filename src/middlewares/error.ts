@@ -1,4 +1,5 @@
 import { ErrorRequestHandler } from 'express';
+import { JsonWebTokenError } from 'jsonwebtoken';
 
 export const errorHandler: ErrorRequestHandler = (
   error,
@@ -6,5 +7,8 @@ export const errorHandler: ErrorRequestHandler = (
   res,
   next
 ) => {
+  if (error instanceof JsonWebTokenError) {
+    return res.status(401).json({ error: error.message });
+  }
   res.status(500).json({ error: error.message });
 };

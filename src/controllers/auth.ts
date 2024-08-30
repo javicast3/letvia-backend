@@ -88,4 +88,12 @@ export const verifyAuthToken: RequestHandler = async (req, res) => {
   res.send();
 };
 
-export const sendProfileInfo: RequestHandler = (req, res) => {};
+export const sendProfileInfo: RequestHandler = (req, res) => {
+  res.json({
+    profile: req.user,
+  });
+};
+
+export const logout: RequestHandler = (req, res) => {
+  res.clearCookie('authToken').send();
+};
