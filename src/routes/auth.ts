@@ -2,11 +2,14 @@ import {
   generateAuthLink,
   logout,
   sendProfileInfo,
+  updateProfile,
   verifyAuthToken,
 } from '@/controllers/auth';
 import { isAuth } from '@/middlewares/auth';
+import { fileParser } from '@/middlewares/file';
 import {
   emailValidationSchema,
+  newUserSchema,
   validate,
 } from '@/middlewares/validator';
 import { Router } from 'express';
@@ -21,5 +24,12 @@ authRouter.post(
 authRouter.get('/email', verifyAuthToken);
 authRouter.get('/profile', isAuth, sendProfileInfo);
 authRouter.post('/logout', isAuth, logout);
+authRouter.put(
+  '/profile',
+  isAuth,
+  fileParser,
+  validate(newUserSchema),
+  updateProfile
+);
 
 export default authRouter;

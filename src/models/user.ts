@@ -4,7 +4,9 @@ export interface UserDoc {
   _id: ObjectId;
   email: string;
   role: 'user' | 'admin';
-  name: string;
+  name?: string;
+  signedUp: boolean;
+  avatar?: { url: string; id: string };
 }
 const userSchema = new Schema<UserDoc>({
   name: {
@@ -21,6 +23,15 @@ const userSchema = new Schema<UserDoc>({
     type: String,
     enum: ['user', 'admin'],
     default: 'user',
+  },
+  signedUp: {
+    type: Boolean,
+    default: false,
+  },
+  avatar: {
+    type: Object,
+    url: String,
+    id: String,
   },
 });
 

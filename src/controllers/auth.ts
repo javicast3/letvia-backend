@@ -6,6 +6,16 @@ import nodemailer from 'nodemailer';
 import mail from '@/utils/mail';
 import { formatUserProfile, sendErrorResponse } from '@/utils/helper';
 import jwt from 'jsonwebtoken';
+import { profile } from 'console';
+import {
+  DeleteObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
+import fs from 'fs';
+import s3Client from '@/cloud/aws';
+import { updateAvatarToAws } from '@/utils/fileUpload';
+import slugify from 'slugify';
 
 export const generateAuthLink: RequestHandler = async (req, res) => {
   const { email } = req.body;
@@ -80,12 +90,11 @@ export const verifyAuthToken: RequestHandler = async (req, res) => {
     sameSite: 'strict',
     expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), //expira despues de 15 dias
   });
-  // res.redirect(
-  //   `${process.env.AUTH_SUCCESS_URL}?profile${JSON.stringify(
-  //     formatUserProfile(user)
-  //   )}`
-  // );
-  res.send();
+  res.redirect(
+    `${process.env.AUTH_SUCCESS_URL}?profile${JSON.stringify(
+      formatUserProfile(user)
+    )}`
+  );
 };
 
 export const sendProfileInfo: RequestHandler = (req, res) => {
@@ -96,4 +105,38 @@ export const sendProfileInfo: RequestHandler = (req, res) => {
 
 export const logout: RequestHandler = (req, res) => {
   res.clearCookie('authToken').send();
+};
+
+export const updateProfile: RequestHandler = async (req, res) => {
+  const user = await UserModel.findByIdAndUpdate(
+    req.user.id,
+    {
+      name: req.body.name,
+      signedUp: true,
+    },
+    {
+      new: true,
+    }
+  );
+  if (!user)
+    return sendErrorResponse({
+      res,
+      message: 'Usuario no encontrado',
+      status: 500,
+    });
+  //si hay algun archivo lo subidmos al cloud y actualizamos la db
+  const file = req.files.avatar;
+  if (file && !Array.isArray(file)) {
+    const uniqueFileName = `${user._id}-${slugify(req.body.name, {
+      lower: true,
+      replacement: '-',
+    })}.png`;
+    user.avatar = await updateAvatarToAws(
+      file,
+      uniqueFileName,
+      user.avatar?.id
+    );
+    await user.save();
+  }
+  res.json({ profile: formatUserProfile(user) });
 };
