@@ -2,6 +2,7 @@ import UserModel from '@/models/user';
 import { formatUserProfile, sendErrorResponse } from '@/utils/helper';
 import { RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
+
 declare global {
   namespace Express {
     export interface Request {
@@ -11,6 +12,8 @@ declare global {
         email: string;
         role: 'user' | 'admin';
         avatar?: string;
+        signedUp: boolean;
+        authorId?: string;
       };
     }
   }
@@ -40,4 +43,14 @@ export const isAuth: RequestHandler = async (req, res, next) => {
   }
   req.user = formatUserProfile(user);
   next();
+};
+
+export const isAdmin: RequestHandler = (req, res, next) => {
+  if (req.user.role === 'admin') next();
+  else
+    sendErrorResponse({
+      message: 'Invalid request!',
+      res,
+      status: 401,
+    });
 };
