@@ -39,7 +39,7 @@ export const registerAuthor: RequestAuthorHandler = async (
     authorId: newAuthor._id,
   });
 
-  res.json({ message: 'Thanks for registering as an author.' });
+  res.json({ message: 'Gracias por registrar al autor' });
 };
 export const getAuthorDetails: RequestHandler = async (req, res) => {
   const { slug } = req.params;

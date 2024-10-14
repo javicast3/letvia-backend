@@ -1,15 +1,16 @@
 import { RequestHandler } from 'express';
+import { isValidObjectId } from 'mongoose';
 import { z, ZodObject, ZodRawShape, ZodType } from 'zod';
 
-export const emailValidationSchema = {
+export const emailValidationSchema = z.object({
   email: z
     .string({
       required_error: 'Email requerido',
       invalid_type_error: 'Tipo inválido',
     })
     .email('Email no válido'),
-};
-export const newUserSchema = {
+});
+export const newUserSchema = z.object({
   name: z
     .string({
       required_error: 'Nombre es requerido',
@@ -20,7 +21,7 @@ export const newUserSchema = {
       'Nombre debe tener una extensión mínima de 3 de caracteres'
     )
     .trim(),
-};
+});
 
 export const newAuthorSchema = z.object({
   name: z
@@ -41,7 +42,7 @@ export const newAuthorSchema = z.object({
     .array(z.string().url('Social links deben ser URLs válidas'))
     .optional(),
 });
-export const newBookSchema = z.object({
+export const commonBookSchema = {
   title: z
     .string({
       required_error: 'El Título es requerido',
@@ -151,6 +152,49 @@ export const newBookSchema = z.object({
   //         .nonnegative('FileInfo.size no válido'),
   //     })
   //   ),
+};
+
+export const newBookSchema = z.object({
+  ...commonBookSchema,
+});
+
+export const updateBookSchema = z.object({
+  ...commonBookSchema,
+  slug: z
+    .string({
+      message: 'Slug no válido',
+    })
+    .trim(),
+});
+export const newReviewSchema = z.object({
+  rating: z
+    .number({
+      required_error: 'Rating es requerido',
+      invalid_type_error: 'Rating no válido',
+    })
+    .nonnegative('Rating debe ser entre 1 y 5')
+    .min(1, 'Rating mínimo debe ser 1')
+    .max(5, 'Rating máximo debe ser 5'),
+  content: z
+    .string({
+      invalid_type_error: 'Rating no válido',
+    })
+    .optional(),
+  bookId: z
+    .string({
+      required_error: 'Book Id es requerido',
+      invalid_type_error: 'Book Id no válido',
+    })
+    .transform((arg, ctx) => {
+      if (!isValidObjectId(arg)) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Book Id no válido',
+        });
+        return z.NEVER;
+      }
+      return arg;
+    }),
 });
 
 export const validate = <T extends ZodRawShape>(

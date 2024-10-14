@@ -1,7 +1,15 @@
-import { createNewBook } from '@/controllers/book';
+import {
+  createNewBook,
+  getAllPurchasedBooks,
+  updateBook,
+} from '@/controllers/book';
 import { isAuth, isAdmin } from '@/middlewares/auth';
 import { fileParser } from '@/middlewares/file';
-import { newBookSchema, validate } from '@/middlewares/validator';
+import {
+  newBookSchema,
+  updateBookSchema,
+  validate,
+} from '@/middlewares/validator';
 
 import { Router } from 'express';
 
@@ -15,5 +23,15 @@ bookRouter.post(
   validate(newBookSchema),
   createNewBook
 );
+
+bookRouter.patch(
+  '/',
+  isAuth,
+  isAdmin,
+  fileParser,
+  validate(updateBookSchema),
+  updateBook
+);
+bookRouter.get('/list', isAuth, getAllPurchasedBooks);
 
 export default bookRouter;

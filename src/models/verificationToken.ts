@@ -6,9 +6,11 @@ interface VerificationTokenDoc {
   token: string;
   expires: Date;
 }
+
 interface Methods {
   compare(token: string): boolean;
 }
+
 const verificationTokenSchema = new Schema<
   VerificationTokenDoc,
   {},
@@ -25,7 +27,6 @@ const verificationTokenSchema = new Schema<
   expires: {
     type: Date,
     default: Date.now(),
-    //24 horas en milisegundo
     expires: 60 * 60 * 24,
   },
 });
@@ -35,16 +36,19 @@ verificationTokenSchema.pre('save', function (next) {
     const salt = genSaltSync(10);
     this.token = hashSync(this.token, salt);
   }
+
   next();
 });
 
-verificationTokenSchema.methods.compare = function (token: string) {
+verificationTokenSchema.methods.compare = function (token) {
   return compareSync(token, this.token);
 };
+
 const VerificationTokenModel = model(
   'VerificationToken',
   verificationTokenSchema
 );
+
 export default VerificationTokenModel as Model<
   VerificationTokenDoc,
   {},
